@@ -2,12 +2,10 @@ pguser=$1
 pgdb=$2
 pgpassword=$3
 
-[ -a Train_details_22122017.csv.gz ] &&   gunzip Train_details_22122017.csv.gz
-
 export PGPASSWORD=${pgpassword}
 
 psql -U $pguser -d $pgdb -h 127.0.0.1 <<EOF
-drop table staging_trains;
+drop table if exists staging_trains;
 
 create table staging_trains
 (train_no integer,
@@ -23,9 +21,8 @@ create table staging_trains
  destination_station text,
  destination_station_name text);
 
-\copy staging_trains from 'Train_details_22122017.csv' csv header;
+drop table if exists day_of_week;
 
-drop table day_of_week;
 create table day_of_week
 (day_number smallint,
  one_letter_abbreviation varchar(1),
@@ -43,4 +40,4 @@ values
 (6, 'S', 'Sa', 'Sat', 'Saturday');
 EOF
 
-gzip Train_details_22122017.csv
+
