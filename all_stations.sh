@@ -1,0 +1,1 @@
+create table all_stations as select station_code, station_name from staging_trains union all select source_station, source_station_name from staging_trains union all select destination_station, destination_station_name from staging_trains; 
