@@ -19,7 +19,7 @@ create temp table all_stations_ranked as
 select station_code, station_name, rank() over (partition by station_code order by length(station_name) desc) as r
 from all_stations;
 
-drop table if exists stations;
+drop table if exists stations cascade;
 create table stations as
 select station_code, station_name from all_stations_ranked where r = 1;
 
