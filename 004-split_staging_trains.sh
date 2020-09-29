@@ -8,7 +8,7 @@ export PGPASSWORD=${pgpassword}
 
 psql -U $pguser -d $pgdb -h 127.0.0.1 <<EOF
 
-drop table if exists trains;
+DROP TABLE IF EXISTS trains;
 
 CREATE TABLE trains
 (train_no integer PRIMARY KEY,
