@@ -10,28 +10,36 @@ psql -U $pguser -d $pgdb -h 127.0.0.1 <<EOF
 
 drop table if exists trains;
 
-create table trains
-(train_no integer primary key,
- train_name text,
- source_station_code text references stations(station_code),
- destination_station_code text references stations(station_code));
+CREATE TABLE trains
+(train_no integer PRIMARY KEY,
+ train_name text NOT NULL,
+ source_station_code text NOT NULL REFERENCES stations(station_code),
+ destination_station_code text NOT NULL REFERENCES stations(station_code));
 
-insert into trains (train_no, train_name, source_station_code, destination_station_code)
-select distinct train_no, train_name, source_station, destination_station from staging_trains;
+CREATE INDEX trains_source_station_code_idx ON trains(source_station_code);
 
-drop table if exists train_stations;
+CREATE INDEX trains_destination_station_code_idx ON trains(destination_station_code);
 
-create table train_stations
+INSERT INTO trains
+(train_no, train_name, source_station_code, destination_station_code)
+SELECT distinct train_no, train_name, source_station, destination_station FROM staging_trains;
+
+DROP TABLE IF EXISTS train_stations;
+
+CREATE TABLE train_stations
 (train_no integer,
  seq smallint,
- station_code text references stations(station_code),
- arrival_time time without time zone,
- departure_time time without time zone,
- distance_from_origin smallint,
- constraint train_stations_pk primary key (train_no, seq));
+ station_code text NOT NULL REFERENCES stations(station_code),
+ arrival_time time without time zone NOT NULL,
+ departure_time time without time zone NOT NULL,
+ distance_from_origin smallint NOT NULL,
+ CONSTRAINT train_stations_pk PRIMARY KEY (train_no, seq));
 
-insert into train_stations (train_no, seq, station_code, arrival_time, departure_time, distance_from_origin)
-select train_no, seq, station_code, arrival_time, departure_time, distance from staging_trains;
+CREATE INDEX train_stations_station_code_idx ON train_stations(station_code);
+
+INSERT INTO train_stations
+(train_no, seq, station_code, arrival_time, departure_time, distance_from_origin)
+SELECT train_no, seq, station_code, arrival_time, departure_time, distance FROM staging_trains;
 
 
 EOF
