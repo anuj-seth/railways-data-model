@@ -19,26 +19,32 @@ WHERE (train_no, seq) IN (SELECT train_no, max(seq) as seq
                           FROM train_stations
                           GROUP BY train_no);
 
---select * from train_stations where station_code = 'SWV' order by arrival_time;
+CREATE TABLE train_arrivals
+(train_no integer,
+ seq smallint,
+ arrival_time time without time zone NOT NULL,
+ CONSTRAINT train_arrivals_pk PRIMARY KEY (train_no, seq),
+ CONSTRAINT train_arrivals_fk FOREIGN KEY (train_no, seq) REFERENCES train_stations(train_no, seq));
 
---select arrival_time - previous_arrival from (select arrival_time, lag(arrival_time) over (order by arrival_time) as previous_arrival from train_stations where station_code = 'SWV' order by arrival_time) as foo;
+INSERT INTO train_arrivals (train_no, seq, arrival_time)
+SELECT train_no, seq, arrival_time
+FROM train_stations
+WHERE arrival_time is not null;
+
+CREATE TABLE train_departures
+(train_no integer,
+ seq smallint,
+ departure_time time without time zone NOT NULL,
+ CONSTRAINT train_departures_pk PRIMARY KEY (train_no, seq),
+ CONSTRAINT train_departures_fk FOREIGN KEY (train_no, seq) REFERENCES train_stations(train_no, seq));
+
+INSERT INTO train_departures (train_no, seq, departure_time)
+SELECT train_no, seq, departure_time
+FROM train_stations
+WHERE departure_time is not null;
+
+ALTER TABLE train_stations DROP COLUMN arrival_time;
+
+ALTER TABLE train_stations DROP COLUMN departure_time;
 
 EOF
-
-
-# SELECT *
-# FROM train_stations t_s_1
-# WHERE departure_time = '00:00:00'
-# and station_code = 'NDLS'
-# AND (train_no, seq) NOT IN (SELECT train_no, max(seq)
-#                             FROM train_stations t_s_2
-#                             WHERE t_s_2.station_code = t_s_1.station_code
-#                             GROUP BY t_s_2.train_no);
-
-
-# select *
-#               from train_stations t_s
-#               where t_s.departure_time = '00:00:00'
-#               and (train_no, seq) not in (SELECT train_no, max(seq)
-#                                           FROM train_stations t_s_1
-#                                           group by train_no);
