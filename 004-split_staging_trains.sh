@@ -8,7 +8,7 @@ export PGPASSWORD=${pgpassword}
 
 psql -U $pguser -d $pgdb -h 127.0.0.1 <<EOF
 
-DROP TABLE IF EXISTS trains;
+DROP TABLE IF EXISTS trains CASCADE;
 
 CREATE TABLE trains
 (train_no integer PRIMARY KEY,
@@ -24,7 +24,7 @@ INSERT INTO trains
 (train_no, train_name, source_station_code, destination_station_code)
 SELECT distinct train_no, train_name, source_station, destination_station FROM staging_trains;
 
-DROP TABLE IF EXISTS train_stations;
+DROP TABLE IF EXISTS train_stations CASCADE;
 
 CREATE TABLE train_stations
 (train_no integer,
