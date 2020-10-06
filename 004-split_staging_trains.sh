@@ -27,7 +27,7 @@ SELECT distinct train_no, train_name, source_station, destination_station FROM s
 DROP TABLE IF EXISTS train_stations CASCADE;
 
 CREATE TABLE train_stations
-(train_no integer,
+(train_no integer REFERENCES trains(train_no),
  seq smallint,
  station_code text NOT NULL REFERENCES stations(station_code),
  arrival_time time without time zone NOT NULL,
