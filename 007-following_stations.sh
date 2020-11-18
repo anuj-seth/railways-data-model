@@ -18,8 +18,6 @@ CREATE TABLE train_following_stations
  CONSTRAINT train_following_stations_pk PRIMARY KEY (train_no, seq, station_code),
  FOREIGN KEY (train_no, seq) REFERENCES train_stations(train_no, seq));
 
-CREATE INDEX train_following_stations_following_stations_idx ON train_following_stations USING GIN (following_stations);
-
 INSERT INTO train_following_stations
 SELECT *
 FROM (SELECT train_no,
@@ -30,4 +28,8 @@ FROM (SELECT train_no,
       WINDOW following_stations_window AS (PARTITION BY train_no ORDER BY seq ASC ROWS BETWEEN 1 following AND unbounded following)) AS foo
 WHERE foo.following_stations IS NOT NULL;
 
+CREATE INDEX train_following_stations_following_stations_idx ON train_following_stations USING GIN (following_stations);
+
 EOF
+
+
