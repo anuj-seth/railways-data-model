@@ -30,3 +30,42 @@ and m_t_j.depth < 2
 )
 select max(depth) from multi_train_journeys;
 
+with recursive multi_train_journeys as
+(select train_no, origin_seq, origin_station_code, departure_from_origin, destination_seq, destination_station_code, arrival_at_destination, 0 as depth, row_number() over () as route_id
+from trains_route_graph
+where origin_station_code = 'JUC'
+UNION ALL
+select t_r_g.train_no, t_r_g.origin_seq, t_r_g.origin_station_code, t_r_g.departure_from_origin, t_r_g.destination_seq, t_r_g.destination_station_code, t_r_g.arrival_at_destination, m_t_j.depth + 1 as depth, m_t_j.route_id
+from trains_route_graph t_r_g
+join multi_train_journeys m_t_j on m_t_j.destination_station_code = t_r_g.origin_station_code
+where t_r_g.destination_station_code <> m_t_j.origin_station_code
+and m_t_j.depth < 1
+)
+select * from multi_train_journeys order by train_no, origin_seq, origin_station_code, departure_from_origin, destination_seq, destination_station_code, arrival_at_destination, depth;
+
+with recursive multi_train_journeys as
+(select train_no, origin_seq, origin_station_code, departure_from_origin, destination_seq, destination_station_code, arrival_at_destination, 0 as depth
+from trains_route_graph
+where origin_station_code = 'JUC'
+UNION ALL
+select t_r_g.train_no, t_r_g.origin_seq, t_r_g.origin_station_code, t_r_g.departure_from_origin, t_r_g.destination_seq, t_r_g.destination_station_code, t_r_g.arrival_at_destination, m_t_j.depth + 1 as depth
+from trains_route_graph t_r_g
+join multi_train_journeys m_t_j on m_t_j.destination_station_code = t_r_g.origin_station_code
+where t_r_g.destination_station_code <> m_t_j.origin_station_code
+and m_t_j.depth < 2
+)
+select count(*) from multi_train_journeys where depth = 1 and origin_station_code = 'BEAS';
+
+with recursive multi_train_journeys as
+(select train_no, origin_seq, origin_station_code, departure_from_origin, destination_seq, destination_station_code, arrival_at_destination, 0 as depth
+from trains_route_graph
+where origin_station_code = 'JUC'
+UNION
+select t_r_g.train_no, t_r_g.origin_seq, t_r_g.origin_station_code, t_r_g.departure_from_origin, t_r_g.destination_seq, t_r_g.destination_station_code, t_r_g.arrival_at_destination, m_t_j.depth + 1 as depth
+from trains_route_graph t_r_g
+join multi_train_journeys m_t_j on m_t_j.destination_station_code = t_r_g.origin_station_code
+where t_r_g.destination_station_code <> m_t_j.origin_station_code
+and m_t_j.depth < 2
+)
+select count(*) from multi_train_journeys;
+

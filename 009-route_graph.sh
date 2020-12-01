@@ -8,17 +8,26 @@ export PGPASSWORD=${pgpassword}
 
 psql -U $pguser -d $pgdb -h 127.0.0.1 <<EOF
 
+DROP TABLE IF EXISTS trains_route_graph;
+
 CREATE TABLE trains_route_graph
-( train_no integer,
-  origin_seq smallint,
-  origin_station_code text NOT NULL REFERENCES stations(station_code),
-  departure_from_origin time without time zone NOT NULL,
-  destination_seq smallint,
-  destination_station_code text NOT NULL REFERENCES stations(station_code),
-  arrival_at_destination time without time zone NOT NULL,
-  CONSTRAINT trains_route_graph_pk PRIMARY KEY (train_no, origin_station_code, destination_station_code),
-  CONSTRAINT trains_route_graph_origin_fk FOREIGN KEY (train_no, origin_seq) REFERENCES train_stations(train_no, seq),
-  CONSTRAINT trains_route_graph_destination_fk FOREIGN KEY (train_no, destination_seq) REFERENCES train_stations(train_no, seq));
+(edge_id serial,
+ train_no integer,
+ origin_seq smallint,
+ origin_station_code text NOT NULL REFERENCES stations(station_code),
+ departure_from_origin time without time zone NOT NULL,
+ destination_seq smallint,
+ destination_station_code text NOT NULL REFERENCES stations(station_code),
+ arrival_at_destination time without time zone NOT NULL,
+ CONSTRAINT trains_route_graph_pk PRIMARY KEY (train_no, origin_station_code, destination_station_code),
+ CONSTRAINT trains_route_graph_origin_fk FOREIGN KEY (train_no, origin_seq) REFERENCES train_stations(train_no, seq),
+ CONSTRAINT trains_route_graph_destination_fk FOREIGN KEY (train_no, destination_seq) REFERENCES train_stations(train_no, seq));
+
+CREATE INDEX trains_route_graph_origin_station_code_idx ON trains_route_graph(origin_station_code);
+
+CREATE INDEX trains_route_graph_destination_station_code_idx ON trains_route_graph(destination_station_code);
+
+-- TODO fine tune the indexes on station codes ?
 
 INSERT INTO trains_route_graph
 (train_no, origin_seq, origin_station_code, departure_from_origin, destination_seq, destination_station_code, arrival_at_destination)
