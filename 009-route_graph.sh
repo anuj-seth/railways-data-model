@@ -45,6 +45,7 @@ JOIN train_arrivals arrivals ON arrivals.train_no = destination.train_no AND arr
 --WHERE origin.station_code = 'SWV'
 --ORDER BY origin.train_no, origin.seq;
 
+
 EOF
 
 
